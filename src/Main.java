@@ -1,3 +1,4 @@
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -32,6 +33,10 @@ public class Main {
         if (str == null) {
             return false;
         }
+        else if(str.equals("")){
+            return true;
+        }
+
         try {
             int i = Integer.parseInt(str);
         } catch (NumberFormatException nfe) {
@@ -40,57 +45,72 @@ public class Main {
         return true;
     }
 
+    public static ArrayList<String> lettercombinations(String inputLine) {
+        //Extracting the digits between "" from the input string
+        Pattern p = Pattern.compile("\"([^\"]*)\"");
+        Matcher m = p.matcher(inputLine);
+        String digits = "";
+
+        while (m.find()) {
+            digits += m.group(1);
+        }
+
+        //The letter combinations for the output
+        ArrayList<String> combinations = new ArrayList<>();
+        if (isNumeric(digits)) {
+
+            int digitLength = digits.length();
+
+            //If there are no digits, the output is an empty Arraylist
+            if (digitLength > 0) {
+                if(digitLength <= 4) {
+                    combinations.add('"' + "" + '"');
+
+                    //Loop for all extracted digits
+                    for (int i = 0; i < digitLength; i++) {
+                        int digit = Character.getNumericValue(digits.charAt(i));
+
+                        //1 does not map to any letters
+                        if (digit > 1) {
+                            String charsOfDigit = characters.get(digit);
+
+                            ArrayList<String> temp = new ArrayList<>();
+
+                            //Loop for all already existing combinations
+                            for (String combination : combinations) {
+                                for (int k = 0; k < charsOfDigit.length(); k++) {
+                                    //Extending the combinations with the new character
+                                    temp.add(insertChar(combination, charsOfDigit.charAt(k), combination.length() - 1));
+                                }
+                            }
+                            combinations = temp;
+                        }
+                    }
+                }
+                else {
+                    throw new InvalidParameterException();
+                }
+            }
+
+        }
+        else {
+            System.out.println("Digit is not an integer!");
+        }
+        return combinations;
+    }
     public static void main(String[] args) {
 
         //Reading data from console
         Scanner in = new Scanner(System.in);
         String input = in.nextLine();
 
-        //Extracting the digits between "" from the input string
-        Pattern p = Pattern.compile("\"([^\"]*)\"");
-        Matcher m = p.matcher(input);
-        String digits = "";
-        while (m.find()) {
-            digits += m.group(1);
+        try {
+            System.out.println(lettercombinations(input));
+        } catch (Exception e){
+            System.out.println("Invalid input!");
         }
 
-        if (isNumeric(digits)) {
 
-            int digitLength = digits.length();
-
-            //The letter combinations for the output
-            ArrayList<String> combinations = new ArrayList<>();
-
-            //If there are no digits, the output is an empty Arraylist
-            if (digitLength > 0) {
-                combinations.add('"' + "" + '"');
-
-                //Loop for all extracted digits
-                for (int i = 0; i < digitLength; i++) {
-                    int digit = Character.getNumericValue(digits.charAt(i));
-
-                    //1 does not map to any letters
-                    if (digit != 1) {
-                        String charsOfDigit = characters.get(digit);
-
-                        ArrayList<String> temp = new ArrayList<>();
-
-                        //Loop for all already existing combinations
-                        for (String combination : combinations) {
-                            for (int k = 0; k < charsOfDigit.length(); k++) {
-                                //Extending the combinations with the new character
-                                temp.add(insertChar(combination, charsOfDigit.charAt(k), combination.length() - 1));
-                            }
-                        }
-                        combinations = temp;
-                    }
-                }
-            }
-            System.out.println(combinations);
-        }
-        else {
-            System.out.println("Digit is not an integer!");
-        }
     }
     }
 
