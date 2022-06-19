@@ -5,6 +5,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+
 public class Main {
 
     /** Hashmap to store the digits and the letters  */
@@ -21,14 +23,14 @@ public class Main {
         put(0, " ");
     }} ;
 
-    /** Insert character to a string **/
+    /** Inserts character to a string **/
     public static String insertChar(String str, char what, int indexWhere) {
         String strBegin = str.substring(0,indexWhere);
         String strEnd = str.substring(indexWhere);
         return strBegin + what + strEnd;
     }
 
-    /** Checking whether input digit is an integer */
+    /** Checks whether input digit is an integer */
     public static boolean isNumeric(String str) {
         if (str == null) {
             return false;
@@ -45,24 +47,55 @@ public class Main {
         return true;
     }
 
-    public static ArrayList<String> lettercombinations(String inputLine) {
+    /**Checks whether the first part of the input is correct*/
+    public static boolean correctFirstPartOfInput(String input, String expected) {
+
+        try {
+            String firstPartOfInput = input.substring(0, 9);
+            return expected.equals(firstPartOfInput);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**Extracts the digits from the input*/
+    public static String getDigits(String inputLine) {
         //Extracting the digits between "" from the input string
         Pattern p = Pattern.compile("\"([^\"]*)\"");
         Matcher m = p.matcher(inputLine);
+
         String digits = "";
+
+        //This parameter is needed to check whether there are Quotation marks in the input
+        boolean foundQuotation = false;
 
         while (m.find()) {
             digits += m.group(1);
+            foundQuotation = true;
         }
+
+        String firstPartMustBe = "digits = ";
+
+        //Check whether the input format is valid
+        if(!foundQuotation || !correctFirstPartOfInput(inputLine, firstPartMustBe) || !isNumeric(digits)) {
+            throw new InvalidParameterException();
+        }
+        return digits;
+    }
+
+    /**The function for getting the combinations*/
+    public static ArrayList<String> lettercombinations(String inputLine) {
+
+        String digits = getDigits(inputLine);
 
         //The letter combinations for the output
         ArrayList<String> combinations = new ArrayList<>();
-        if (isNumeric(digits)) {
 
-            int digitLength = digits.length();
+        int digitLength = digits.length();
 
             //If there are no digits, the output is an empty Arraylist
             if (digitLength > 0) {
+                //If there are more than 4 digits, throws an Exception
                 if(digitLength <= 4) {
                     combinations.add('"' + "" + '"');
 
@@ -70,7 +103,7 @@ public class Main {
                     for (int i = 0; i < digitLength; i++) {
                         int digit = Character.getNumericValue(digits.charAt(i));
 
-                        //1 does not map to any letters
+                        //0 and 1 do not map to any letters, if the digits include 0 or 1, throws an Exception
                         if (digit > 1) {
                             String charsOfDigit = characters.get(digit);
 
@@ -85,19 +118,20 @@ public class Main {
                             }
                             combinations = temp;
                         }
+                        else {
+                            throw new InvalidParameterException();
+                        }
                     }
                 }
                 else {
                     throw new InvalidParameterException();
                 }
             }
-
-        }
-        else {
-            System.out.println("Digit is not an integer!");
-        }
+        //The combinations ArrayList is already sorted alphabetically
         return combinations;
     }
+
+
     public static void main(String[] args) {
 
         //Reading data from console
@@ -109,8 +143,7 @@ public class Main {
         } catch (Exception e){
             System.out.println("Invalid input!");
         }
-
-
     }
+
     }
 
